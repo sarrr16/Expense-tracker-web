@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -25,11 +26,11 @@ app.add_middleware(
 # Security
 security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")  # Change this in production
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-this-in-production")
 ALGORITHM = "HS256"
 
 # MongoDB setup
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")  # Replace with your MongoDB Atlas URL
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
 client = AsyncIOMotorClient(MONGODB_URL)
 db = client.expense_tracker
 
@@ -105,6 +106,16 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+# Serve the HTML file
+@app.get("/", response_class=HTMLResponse)
+async def get_index():
+    try:
+        with open("index.html", "r", encoding="utf-8") as file:
+            html_content = file.read()
+        return HTMLResponse(content=html_content)
+    except FileNotFoundError:
+        return HTMLResponse(content="<h1>Index.html not found</h1>", status_code=404)
 
 # API Routes
 @app.post("/register")
@@ -229,8 +240,8 @@ async def delete_expense(expense_id: str, current_user: dict = Depends(get_curre
     except Exception as e:
         raise HTTPException(status_code=400, detail="Invalid expense ID")
 
-@app.get("/")
-async def root():
+@app.get("/health")
+async def health_check():
     return {"message": "Expense Tracker API is running"}
 
 if __name__ == "__main__":
