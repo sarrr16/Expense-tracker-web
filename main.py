@@ -113,6 +113,14 @@ async def get_index():
     try:
         with open("index.html", "r", encoding="utf-8") as file:
             html_content = file.read()
+        
+        # Replace the API URL with the current host
+        # This will work both locally and on Render
+        html_content = html_content.replace(
+            "const API_BASE_URL = 'http://localhost:8000';",
+            "const API_BASE_URL = window.location.origin;"
+        )
+        
         return HTMLResponse(content=html_content)
     except FileNotFoundError:
         return HTMLResponse(content="<h1>Index.html not found</h1>", status_code=404)
