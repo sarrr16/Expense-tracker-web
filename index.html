@@ -423,7 +423,15 @@
                     body: JSON.stringify({ username, password })
                 });
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    const text = await response.text();
+                    alert("Server Error:\n" + text);
+                    return;
+                }
+
                 
                 if (response.ok) {
                     authToken = data.access_token;
@@ -457,7 +465,15 @@
                     body: JSON.stringify({ username, email, password })
                 });
                 
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    const text = await response.text();
+                    alert("Server Error:\n" + text);
+                    return;
+                }
+
                 
                 if (response.ok) {
                     authToken = data.access_token;
